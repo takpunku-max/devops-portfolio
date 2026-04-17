@@ -71,3 +71,40 @@ resource "aws_cloudfront_origin_access_control" "frontend" {
   signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
 }
+
+resource "aws_instance" "backend" {
+    ami = "ami-0453ec754f44f9a4a"
+    instance_type = "t3.micro"
+    key_name = "devops-portfolio"
+    vpc_security_group_ids = [aws_security_group.backend.id]
+
+    tags = {
+        Name = "devops-portfolio-backend"
+    }
+}
+
+resource "aws_security_group" "backend" {
+    name = "devops-portfolio-backend-sg"
+
+    ingress{
+        from_port = 22
+        to_port = 22
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+
+    ingress {
+        from_port = 8000
+        to_port = 8000
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+
+    egress {
+        from_port = 0
+        to_port = 0
+        protocol = "-1"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+}
+
