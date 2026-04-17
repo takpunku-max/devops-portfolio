@@ -2,6 +2,7 @@
 *.tfstat
 *.tfstate.backup
 .terraform.lock.hcl
+IAM_access.txt
 
 # Python
 backend/.venv/
