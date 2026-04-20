@@ -4,7 +4,7 @@ function App() {
   const [health, setHealth] = useState(null)
 
   useEffect(() => {
-    fetch('${import.meta.env.VITE_API_URL}/health')
+    fetch(`${import.meta.env.VITE_API_URL}/health`)
       .then(r => r.json())
       .then(setHealth)
       .catch(() => setHealth({ status: 'unreachable' }))
