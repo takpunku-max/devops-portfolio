@@ -141,3 +141,31 @@ resource "aws_s3_bucket_policy" "frontend" {
         ]
     })
 }
+
+data "aws_route53_zone" "main" {
+    name = "kjdevops-portfolio.com"
+}
+
+resource "aws_route53_record" "frontend" {
+    zone_id = data.aws_route53_zone.main.zone_id
+    name = "kjdevops-portfolio.com"
+    type = "A"
+
+    alias {
+        name = aws_cloudfront_distribution.frontend.domain_name
+        zone_id = aws_cloudfront_distribution.frontend.hosted_zone_id
+        evaluate_target_health = false
+    }
+}
+
+resource "aws_route53_record" "www" {
+    zone_id = data.aws_route53_zone.main.zone_id
+    name = "www.kjdevops-portfolio.com"
+    type = "A"
+
+    alias {
+        name = aws_cloudfront_distribution.frontend.domain_name
+        zone_id = aws_cloudfront_distribution.frontend.hosted_zone_id
+        evaluate_target_health = false
+    }
+}
