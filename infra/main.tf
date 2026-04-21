@@ -32,6 +32,8 @@ resource "aws_s3_bucket_website_configuration" "frontend" {
 resource "aws_cloudfront_distribution" "frontend" {
     enabled = true
     default_root_object = "index.html"
+    aliases = ["kjdevops-portfolio.com", "www.kjdevops-portfolio.com"]
+    }
 
     origin {
         domain_name              = aws_s3_bucket.frontend.bucket_regional_domain_name
@@ -63,8 +65,6 @@ resource "aws_cloudfront_distribution" "frontend" {
         acm_certificate_arn = "arn:aws:acm:us-east-1:895112955219:certificate/420d1f6f-4b75-4444-b7f0-651d8315ef1a"
         ssl_support_method = "sni-only"
         minimum_protocol_version = "TLSv1.2_2021"
-        aliases = ["kjdevops-portfolio.com", "www.kjdevops-portfolio.com"]
-    }
 }
 
 
