@@ -7,7 +7,8 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173",
-                   "https://d3lihg66x323pi.cloudfront.net"
+                   "https://kjdevops-portfolio.com",
+                   "https://www.kjdevops-portfolio.com"
                    ],
     allow_methods=["*"],
     allow_headers=["*"],
