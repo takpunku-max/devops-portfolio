@@ -5,7 +5,7 @@ function App() {
 
   useEffect(() => {
     console.log('API URL:', import.meta.env.VITE_API_URL)
-    fetch(`http://52.7.39.253:8000/health`)
+    fetch(`${import.meta.env.VITE_API_URL}/health`)
       .then(r => r.json())
       .then(setHealth)
       .catch(() => setHealth({ status: 'unreachable' }))
