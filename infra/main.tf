@@ -33,7 +33,6 @@ resource "aws_cloudfront_distribution" "frontend" {
     enabled = true
     default_root_object = "index.html"
     aliases = ["kjdevops-portfolio.com", "www.kjdevops-portfolio.com"]
-    }
 
     origin {
         domain_name              = aws_s3_bucket.frontend.bucket_regional_domain_name
