@@ -3,7 +3,6 @@ from fastapi.middleware.cors import CORSMiddleware # type: ignore
 from mangum import Mangum
 
 app = FastAPI()
-handler = Mangum(app)
 
 
 app.add_middleware(
@@ -21,4 +20,4 @@ app.add_middleware(
 def health():
     return {"status":"0K"}
 
-
+handler = Mangum(app)
