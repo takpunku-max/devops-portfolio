@@ -178,3 +178,35 @@ resource "aws_ecr_repository" "backend" {
         scan_on_push = true
     }
 }
+
+resource "aws_lambda_function" "backend" {
+    function_name = "devops-portfolio-backend"
+    role = aws_iam_role.lambda_exec.arn
+    package_type = "Image"
+    image_uri = "895112955219.dkr.ecr.us-east-1.amazonaws.com/devops-portfolio-backend:latest"
+
+    timeout = 30
+    memory_size = 256
+
+}
+
+resource "aws_iam_role" "lambda_exec" {
+    name = "devops-portfolio-lambda-role"
+    
+    assume_role_policy = jsonencode({
+        Version = "2012-10-17"
+        Statement = [{
+            Action = "sts:AssumeRole"
+            Effect = "Allow"
+            Principal = {
+                Service = "lambda.amazonaws.com"
+            }
+        }]
+    })
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_logs" {
+    role = aws_iam_role.lambda_exec.name
+    policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
