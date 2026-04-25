@@ -1,7 +1,9 @@
 from fastapi import FastAPI # type: ignore
 from fastapi.middleware.cors import CORSMiddleware # type: ignore
+from mangum import Mangum
 
 app = FastAPI()
+handler = Mangum(app)
 
 
 app.add_middleware(
