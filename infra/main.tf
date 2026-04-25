@@ -169,3 +169,12 @@ resource "aws_route53_record" "www" {
         evaluate_target_health = false
     }
 }
+
+resource "aws_ecr_repository" "backend" {
+    name = "devops-portfolilo-backend"
+    image_tag_mutability = "MUTABLE"
+
+    image_scanning_configuration {
+        scan_on_push = true
+    }
+}
