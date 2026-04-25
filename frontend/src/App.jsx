@@ -4,7 +4,6 @@ function App() {
   const [health, setHealth] = useState(null)
 
   useEffect(() => {
-    console.log('API URL:', import.meta.env.VITE_API_URL)
     fetch(`${import.meta.env.VITE_API_URL}/health`)
       .then(r => r.json())
       .then(setHealth)
