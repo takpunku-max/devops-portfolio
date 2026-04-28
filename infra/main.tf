@@ -1,250 +1,46 @@
-terraform{
-    required_providers {
-        aws = {
-            source = "hashicorp/aws"
-            version = "~> 5.0"
-        }
-    }
+module "storage" {
+  source      = "./modules/storage"
+  bucket_name = var.bucket_name
 }
 
-provider "aws" {
-    region = "us-east-1"
+module "cdn" {
+  source = "./modules/cdn"
+
+  bucket_regional_domain_name = module.storage.bucket_regional_domain_name
+  oac_id                      = module.storage.oac_id
+  domain_name                 = var.domain_name
+  acm_certificate_arn         = var.acm_certificate_arn
 }
 
+module "compute" {
+  source = "./modules/compute"
 
-resource "aws_s3_bucket" "frontend" {
-    bucket = "devops-portfolio-frontend-takpunku"
-}
-
-resource "aws_s3_bucket_website_configuration" "frontend" {
-    bucket = aws_s3_bucket.frontend.id
-
-    index_document {
-        suffix = "index.html"
-    }
-
-    error_document {
-        key = "index.html"
-    }
-}
-
-
-resource "aws_cloudfront_distribution" "frontend" {
-    enabled = true
-    default_root_object = "index.html"
-    aliases = ["kjdevops-portfolio.com", "www.kjdevops-portfolio.com"]
-
-    origin {
-        domain_name              = aws_s3_bucket.frontend.bucket_regional_domain_name
-        origin_id                = "s3-frontend"
-        origin_access_control_id = aws_cloudfront_origin_access_control.frontend.id
-}
-
-    default_cache_behavior {
-        target_origin_id = "s3-frontend"
-        viewer_protocol_policy = "redirect-to-https"
-        allowed_methods = ["GET", "HEAD"]
-        cached_methods = ["GET", "HEAD"]
-
-        forwarded_values {
-            query_string = false
-            cookies {
-                forward = "none"
-            }
-        }
-    }
-
-    restrictions {
-        geo_restriction {
-            restriction_type = "none"
-        }
-    }
-
-    viewer_certificate {
-        acm_certificate_arn = "arn:aws:acm:us-east-1:895112955219:certificate/d177e328-f32d-401e-ab9a-5b29793f862c"
-        ssl_support_method = "sni-only"
-        minimum_protocol_version = "TLSv1.2_2021"
-    }
-}
-
-
-resource "aws_cloudfront_origin_access_control" "frontend" {
-  name                              = "devops-portfolio-oac"
-  origin_access_control_origin_type = "s3"
-  signing_behavior                  = "always"
-  signing_protocol                  = "sigv4"
-}
-
-resource "aws_instance" "backend" {
-    ami = "ami-0453ec754f44f9a4a"
-    instance_type = "t3.micro"
-    key_name = "devops-portfolio"
-    vpc_security_group_ids = [aws_security_group.backend.id]
-
-    tags = {
-        Name = "devops-portfolio-backend"
-    }
-}
-
-resource "aws_security_group" "backend" {
-    name = "devops-portfolio-backend-sg"
-
-    ingress{
-        from_port = 22
-        to_port = 22
-        protocol = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
-
-    ingress {
-        from_port = 8000
-        to_port = 8000
-        protocol = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
-
-    ingress {
-        from_port = 443
-        to_port = 443
-        protocol = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
-}
-
-    egress {
-        from_port = 0
-        to_port = 0
-        protocol = "-1"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
+  project_name       = var.project_name
+  lambda_image_uri   = var.lambda_image_uri
+  cors_allow_origins = ["https://${var.domain_name}", "https://www.${var.domain_name}"]
 }
 
 resource "aws_s3_bucket_policy" "frontend" {
-    bucket = aws_s3_bucket.frontend.id
-    
-    policy = jsonencode({
-        Version = "2012-10-17"
-        Statement = [
-            {
-                Sid = "AllowCloudFrontAccess"
-                Effect = "Allow"
-                Principal = {
-                    Service = "cloudfront.amazonaws.com"
-                }
-                Action = "s3:GetObject"
-                Resource = "${aws_s3_bucket.frontend.arn}/*"
-                Condition = {
-                    StringEquals = {
-                        "AWS:SourceArn" = aws_cloudfront_distribution.frontend.arn
-                    }
-                }
-            }
-        ]
-    })
-}
+  bucket = module.storage.bucket_id
 
-data "aws_route53_zone" "main" {
-    name = "kjdevops-portfolio.com"
-}
-
-resource "aws_route53_record" "frontend" {
-    zone_id = data.aws_route53_zone.main.zone_id
-    name = "kjdevops-portfolio.com"
-    type = "A"
-
-    alias {
-        name = aws_cloudfront_distribution.frontend.domain_name
-        zone_id = aws_cloudfront_distribution.frontend.hosted_zone_id
-        evaluate_target_health = false
-    }
-}
-
-resource "aws_route53_record" "www" {
-    zone_id = data.aws_route53_zone.main.zone_id
-    name = "www.kjdevops-portfolio.com"
-    type = "A"
-
-    alias {
-        name = aws_cloudfront_distribution.frontend.domain_name
-        zone_id = aws_cloudfront_distribution.frontend.hosted_zone_id
-        evaluate_target_health = false
-    }
-}
-
-resource "aws_ecr_repository" "backend" {
-    name = "devops-portfolio-backend"
-    image_tag_mutability = "MUTABLE"
-
-    image_scanning_configuration {
-        scan_on_push = true
-    }
-}
-
-resource "aws_lambda_function" "backend" {
-    function_name = "devops-portfolio-backend"
-    role = aws_iam_role.lambda_exec.arn
-    package_type = "Image"
-    image_uri = "895112955219.dkr.ecr.us-east-1.amazonaws.com/devops-portfolio-backend:latest"
-
-    timeout = 30
-    memory_size = 256
-
-}
-
-resource "aws_iam_role" "lambda_exec" {
-    name = "devops-portfolio-lambda-role"
-    
-    assume_role_policy = jsonencode({
-        Version = "2012-10-17"
-        Statement = [{
-            Action = "sts:AssumeRole"
-            Effect = "Allow"
-            Principal = {
-                Service = "lambda.amazonaws.com"
-            }
-        }]
-    })
-}
-
-resource "aws_iam_role_policy_attachment" "lambda_logs" {
-    role = aws_iam_role.lambda_exec.name
-    policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-}
-
-resource "aws_apigatewayv2_api" "backend" {
-    name = "devops-portfolio-api"
-    protocol_type = "HTTP"
-
-    cors_configuration {
-        allow_origins = ["https://kjdevops-portfolio.com", "https://www.kjdevops-portfolio.com"]
-        allow_methods = ["GET", "POST", "OPTIONS"]
-        allow_headers = ["content-type"]
-    }
-}
-
-resource "aws_apigatewayv2_integration" "backend" {
-    api_id = aws_apigatewayv2_api.backend.id
-    integration_type = "AWS_PROXY"
-    integration_uri = aws_lambda_function.backend.invoke_arn
-    payload_format_version = "2.0"
-}
-
-resource "aws_apigatewayv2_route" "backend" {
-    api_id = aws_apigatewayv2_api.backend.id
-    route_key = "ANY /{proxy+}"
-    target = "integrations/${aws_apigatewayv2_integration.backend.id}"
-}
-
-resource "aws_apigatewayv2_stage" "backend" {
-    api_id = aws_apigatewayv2_api.backend.id
-    name = "$default"
-    auto_deploy = true
-}
-
-resource "aws_lambda_permission" "backend" {
-    statement_id = "AllowAPIGatewayInvoke"
-    action = "lambda:InvokeFunction"
-    function_name = aws_lambda_function.backend.function_name
-    principal = "apigateway.amazonaws.com"
-    source_arn = "${aws_apigatewayv2_api.backend.execution_arn}/*/*"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "AllowCloudFrontAccess"
+        Effect = "Allow"
+        Principal = {
+          Service = "cloudfront.amazonaws.com"
+        }
+        Action   = "s3:GetObject"
+        Resource = "${module.storage.bucket_arn}/*"
+        Condition = {
+          StringEquals = {
+            "AWS:SourceArn" = module.cdn.distribution_arn
+          }
+        }
+      }
+    ]
+  })
 }
 
