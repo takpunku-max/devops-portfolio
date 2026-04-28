@@ -13,7 +13,7 @@ function App() {
   return (
     <main style={{ fontFamily: 'system-ui', padding: '2rem' }}>
       <h1>KJ's DevOps Portfolio!</h1>
-      <p>API status: <code>{health ? JSON.stringify(health) : 'loading...'}</code></p>
+      <p>API Status: <code>{health ? JSON.stringify(health) : 'loading...'}</code></p>
     </main>
   )
 }
