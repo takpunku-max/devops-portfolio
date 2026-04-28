@@ -116,17 +116,13 @@ terraform plan
 
 ## Infrastructure (Terraform)
 
-All AWS resources are defined as code in `infra/main.tf`:
+AWS resources are defined as code across three modules in `infra/modules/`:
 
-- **S3** — private bucket for frontend static files
-- **CloudFront** — CDN with OAC, HTTPS enforcement, custom domain
-- **ACM** — SSL certificate for `kjdevops-portfolio.com`
-- **Route 53** — DNS records pointing domain to CloudFront
-- **ECR** — private container registry with vulnerability scanning
-- **Lambda** — serverless function running FastAPI container (256MB, 30s timeout)
-- **API Gateway** — HTTP API with CORS configuration routing to Lambda
-- **IAM** — least-privilege execution role for Lambda
+- **storage** — S3 private bucket for frontend static files + CloudFront OAC
+- **cdn** — CloudFront distribution with OAC, HTTPS enforcement, custom domain + Route 53 records
+- **compute** — Lambda (FastAPI container, 256MB, 30s timeout) + API Gateway (HTTP, CORS) + ECR (vulnerability scanning) + IAM least-privilege execution role
 
+Remote state is stored in S3 (`devops-portfolio-tfstate-kj`) with DynamoDB locking (`devops-portfolio-tflock`) to prevent concurrent apply conflicts.
 ---
 
 ## Challenges & Solutions
