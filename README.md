@@ -53,12 +53,16 @@ devops-portfolio/
 │   ├── main.py             # API routes + Mangum handler
 │   ├── Dockerfile          # Lambda container image
 │   └── requirements.txt
-├── infra/                  # Terraform IaC
-│   └── main.tf             # All AWS resources
-└── .github/
-    └── workflows/
-        ├── frontend-deploy.yml
-        └── backend-deploy.yml
+├── infra/                     # Terraform IaC
+│   ├── backend.tf             # Remote state (S3 + DynamoDB lock)
+│   ├── provider.tf            # AWS provider config
+│   ├── main.tf                # Root module — calls child modules
+│   ├── variables.tf           # Input variables
+│   ├── outputs.tf             # Stack outputs
+│   └── modules/
+│       ├── storage/           # S3 bucket + OAC
+│       ├── cdn/               # CloudFront + Route53
+│       └── compute/           # Lambda + API Gateway + ECR + IAM
 ```
 
 ---
@@ -135,6 +139,8 @@ All AWS resources are defined as code in `infra/main.tf`:
 
 **Terraform state corruption** — Accidentally committed `.terraform/` directory containing a 648MB provider binary. Removed from git history using `git filter-branch` and added proper `.gitignore`.
 
+**Terraform module refactor + state migration** — Refactored monolithic `main.tf` into three child modules. Migrated local state to S3 backend with DynamoDB locking. Required careful `terraform state mv` and `terraform import` operations to remap existing resources to new module addresses without destroying live infrastructure.
+
 ---
 
 ## What I Learned
@@ -145,11 +151,13 @@ All AWS resources are defined as code in `infra/main.tf`:
 - Serverless architecture tradeoffs — Lambda eliminates idle EC2 costs at the expense of cold starts
 - CI/CD pipeline design — separating frontend and backend pipelines with path-based triggers
 - AWS IAM least-privilege principles — every service gets only the permissions it needs
+- Terraform module design — separating concerns into reusable modules with explicit input/output contracts
+- Remote state management — S3 backend with DynamoDB locking for safe collaborative and pipeline-driven applies
 
 ---
 
 ## Author
 
-**KJ** — Aspiring DevOps Engineer | AWS CCP | ITIL 4 | CompTIA A+
+**KJ** — DevOps/Cloud Engineer | AWS CCP | ITIL 4 | CompTIA A+
 
 Currently pursuing BSIT at WGU (expected December 2026) and working as an IT Student Worker at Texas A&M University System Office.
