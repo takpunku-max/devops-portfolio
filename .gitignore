@@ -1,13 +1,15 @@
+# Terraform
 .terraform/
-*.tfstat
+*.tfstate
 *.tfstate.backup
 .terraform.lock.hcl
-IAM_access.txt
-.venv
+*.tfvars
 
 # Python
 backend/.venv/
 backend/__pycache__/
+**/__pycache__/
+*.pyc
 
 # Node
 frontend/node_modules/
@@ -16,3 +18,10 @@ frontend/dist/
 # Env files
 .env
 .env.local
+.env.*
+!.env.example
+
+# General
+.DS_Store
+*.log
+IAM_access.txt
