@@ -11,8 +11,8 @@ app.add_middleware(
                    "https://kjdevops-portfolio.com",
                    "https://www.kjdevops-portfolio.com"
                    ],
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET","POST","OPTIONS"],
+    allow_headers=["content-type"],
 )
 
 
