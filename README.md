@@ -1,27 +1,12 @@
 # KJ's DevOps Portfolio
 
-> A full-stack portfolio site built to demonstrate real-world DevOps practices — infrastructure as code, containerization, serverless compute, and automated CI/CD pipelines.
+> A full-stack portfolio site built to demonstrate real-world DevOps practices — infrastructure as code, containerization, serverless compute, automated CI/CD pipelines, and security hardening.
 
 🌐 **Live:** [kjdevops-portfolio.com](https://kjdevops-portfolio.com)
 
 ---
 
 ## Architecture
-
-```
-Browser
-  └── Route 53 (DNS)
-        └── CloudFront (CDN + HTTPS)
-              ├── S3 (React/Vite static frontend)
-              └── API Gateway (HTTP)
-                    └── Lambda (FastAPI + Mangum + Docker)
-                          └── ECR (container image registry)
-
-GitHub Actions
-  ├── frontend-deploy.yml  →  build → S3 sync → CloudFront invalidation
-  └── backend-deploy.yml   →  build image → push to ECR → update Lambda
-```
-
 ---
 
 ## Tech Stack
@@ -41,30 +26,6 @@ GitHub Actions
 ---
 
 ## Project Structure
-
-```
-devops-portfolio/
-├── frontend/               # React/Vite app
-│   ├── src/
-│   │   ├── App.jsx         # Main component
-│   │   └── main.jsx        # React entry point
-│   └── vite.config.js
-├── backend/                # FastAPI app
-│   ├── main.py             # API routes + Mangum handler
-│   ├── Dockerfile          # Lambda container image
-│   └── requirements.txt
-├── infra/                     # Terraform IaC
-│   ├── backend.tf             # Remote state (S3 + DynamoDB lock)
-│   ├── provider.tf            # AWS provider config
-│   ├── main.tf                # Root module — calls child modules
-│   ├── variables.tf           # Input variables
-│   ├── outputs.tf             # Stack outputs
-│   └── modules/
-│       ├── storage/           # S3 bucket + OAC
-│       ├── cdn/               # CloudFront + Route53
-│       └── compute/           # Lambda + API Gateway + ECR + IAM
-```
-
 ---
 
 ## Local Development
@@ -75,8 +36,8 @@ devops-portfolio/
 ```bash
 cd frontend
 npm install
-cp .env.example .env.local   # set VITE_API_URL=http://localhost:8000
-npm run dev                  # http://localhost:5173
+cp .env.example .env.local # set VITE_API_URL=http://localhost:8000
+npm run dev # http://localhost:5173
 ```
 
 **Backend:**
@@ -85,7 +46,7 @@ cd backend
 python3.12 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-uvicorn main:app --reload    # http://localhost:8000
+uvicorn main:app --reload # http://localhost:8000
 ```
 
 **Infrastructure (dry run):**
@@ -109,8 +70,13 @@ terraform plan
 **Backend pipeline** triggers on changes to `backend/**`:
 1. Build Docker image for `linux/amd64`
 2. Authenticate to ECR
-3. Push image to ECR
+3. Push image tagged with `sha-run_number` to ECR
 4. Update Lambda function to use new image
+
+**Lint pipeline** triggers on push to main and all pull requests:
+1. Run ruff linter against backend Python
+2. Run ESLint against frontend JavaScript
+3. Both jobs must pass before a PR can be merged into main
 
 ---
 
@@ -120,9 +86,22 @@ AWS resources are defined as code across three modules in `infra/modules/`:
 
 - **storage** — S3 private bucket for frontend static files + CloudFront OAC
 - **cdn** — CloudFront distribution with OAC, HTTPS enforcement, custom domain + Route 53 records
-- **compute** — Lambda (FastAPI container, 256MB, 30s timeout) + API Gateway (HTTP, CORS) + ECR (vulnerability scanning) + IAM least-privilege execution role
+- **compute** — Lambda (FastAPI container, 256MB, 30s timeout) + API Gateway (HTTP, CORS, throttling) + ECR (immutable tags, vulnerability scanning) + IAM least-privilege execution role
 
 Remote state is stored in S3 (`devops-portfolio-tfstate-kj`) with DynamoDB locking (`devops-portfolio-tflock`) to prevent concurrent apply conflicts.
+
+---
+
+## Security
+
+- **CORS** — FastAPI middleware restricts allowed origins to production domains only, methods to GET/POST/OPTIONS, and headers to content-type
+- **API Gateway throttling** — default route throttling set to burst 50 / rate 100 to protect Lambda from abuse
+- **S3 public access block** — all public ACLs and policies explicitly blocked at the bucket level
+- **ECR immutable tags** — image tags cannot be overwritten; pipeline uses `sha-run_number` format to guarantee uniqueness across retries
+- **IAM least-privilege** — Lambda execution role scoped to AWSLambdaBasicExecutionRole only
+- **TLS 1.2+** — CloudFront enforces TLSv1.2_2021 minimum protocol
+- **Branch protection** — main branch requires passing lint checks and a pull request before any merge; force pushes and direct deletion blocked
+
 ---
 
 ## Challenges & Solutions
@@ -137,18 +116,22 @@ Remote state is stored in S3 (`devops-portfolio-tfstate-kj`) with DynamoDB locki
 
 **Terraform module refactor + state migration** — Refactored monolithic `main.tf` into three child modules. Migrated local state to S3 backend with DynamoDB locking. Required careful `terraform state mv` and `terraform import` operations to remap existing resources to new module addresses without destroying live infrastructure.
 
+**ECR immutable tags + pipeline retry failure** — Switching ECR to immutable tags broke the pipeline because retrying a failed run reused the same git SHA tag which already existed in the registry. Fixed by tagging images with `github.sha`-`github.run_number` — the run number increments on every attempt, guaranteeing a unique tag even on retries of the same commit.
+
 ---
 
 ## What I Learned
 
 - Infrastructure as code with Terraform — provisioning and modifying real AWS resources through code rather than the console
+- Terraform module design — separating concerns into reusable modules with explicit input/output contracts
+- Remote state management — S3 backend with DynamoDB locking for safe collaborative and pipeline-driven applies
 - The full request lifecycle from DNS → CDN → static files and DNS → API Gateway → Lambda → FastAPI
 - Docker containerization for consistent, portable deployments
 - Serverless architecture tradeoffs — Lambda eliminates idle EC2 costs at the expense of cold starts
 - CI/CD pipeline design — separating frontend and backend pipelines with path-based triggers
 - AWS IAM least-privilege principles — every service gets only the permissions it needs
-- Terraform module design — separating concerns into reusable modules with explicit input/output contracts
-- Remote state management — S3 backend with DynamoDB locking for safe collaborative and pipeline-driven applies
+- Security hardening at every layer — tightening CORS, throttling API endpoints, blocking public S3 access, and enforcing immutable container image tags
+- Branch protection with required status checks — enforcing lint gates and PR workflows to mirror professional engineering team practices
 
 ---
 
