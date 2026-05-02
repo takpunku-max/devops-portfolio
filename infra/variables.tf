@@ -23,7 +23,6 @@ variable "acm_certificate_arn" {
 }
 
 variable "lambda_image_uri" {
-  description = "ECR image URI for Lambda"
+  description = "ECR image URI for Lambda - managed by CI/CD pipeline"
   type        = string
-  default     = "895112955219.dkr.ecr.us-east-1.amazonaws.com/devops-portfolio-backend:latest"
 }
