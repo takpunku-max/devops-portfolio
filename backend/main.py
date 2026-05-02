@@ -21,3 +21,4 @@ def health():
     return {"status":"0K"}
 
 handler = Mangum(app)
+
