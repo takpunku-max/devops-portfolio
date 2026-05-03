@@ -2,7 +2,6 @@ from fastapi import FastAPI, Request # type: ignore
 from fastapi.middleware.cors import CORSMiddleware # type: ignore
 from mangum import Mangum
 from aws_lambda_powertools import Logger
-from aws_lambda_powertools.logging import correlation_paths
 
 logger = Logger(service="devops-portfolio")
 
