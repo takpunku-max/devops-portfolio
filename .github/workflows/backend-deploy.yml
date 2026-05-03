@@ -41,3 +41,22 @@ jobs:
           aws lambda update-function-code \
             --function-name devops-portfolio-backend \
             --image-uri $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Verify deployment
+        run: |
+          echo "Waiting for Lambda to finish updating..."
+          aws lambda wait function-updated \
+            --function-name devops-portfolio-backend
+          
+          echo "Checking health endpoint..."
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
+            https://b7ltc8wle4.execute-api.us-east-1.amazonaws.com/health)
+          
+          if [ "$RESPONSE" = "200" ]; then
+            echo "✓ Health check passed — deployment successful"
+          else
+            echo "✗ Health check failed — got HTTP $RESPONSE"
+            exit 1
+          fi
+
+          
