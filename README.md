@@ -7,6 +7,20 @@
 ---
 
 ## Architecture
+
+Browser
+ └── Route 53 (DNS)
+ └── CloudFront (CDN + HTTPS)
+     ├── S3 (React/Vite static frontend)
+     └── API Gateway (HTTP)
+         └── Lambda (FastAPI + Mangum + Docker)
+             └── ECR (container image registry)
+
+GitHub Actions
+ ├── frontend-deploy.yml → build → S3 sync → CloudFront invalidation
+ ├── backend-deploy.yml  → build image → push to ECR → update Lambda → health check
+ └── lint.yml            → ruff (Python) + ESLint (JS) on push and PR
+
 ---
 
 ## Tech Stack
@@ -26,6 +40,34 @@
 ---
 
 ## Project Structure
+
+devops-portfolio/
+├── frontend/                   # React/Vite app
+│   ├── src/
+│   │   ├── App.jsx             # Main component
+│   │   └── main.jsx            # React entry point
+│   └── vite.config.js
+├── backend/                    # FastAPI app
+│   ├── main.py                 # API routes + Mangum handler + structured logging
+│   ├── Dockerfile              # Lambda container image
+│   ├── .dockerignore           # Excludes venv, pycache, .env from image
+│   └── requirements.txt        # Pinned dependencies including mangum
+├── infra/                      # Terraform IaC
+│   ├── backend.tf              # Remote state (S3 + DynamoDB lock)
+│   ├── provider.tf             # AWS provider config
+│   ├── main.tf                 # Root module — calls child modules
+│   ├── variables.tf            # Input variables
+│   ├── outputs.tf              # Stack outputs
+│   └── modules/
+│       ├── storage/            # S3 bucket + OAC + public access block
+│       ├── cdn/                # CloudFront + Route53
+│       └── compute/            # Lambda + API Gateway + ECR + IAM
+└── .github/
+    └── workflows/
+        ├── frontend-deploy.yml
+        ├── backend-deploy.yml
+        └── lint.yml
+
 ---
 
 ## Local Development
