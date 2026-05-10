@@ -8,6 +8,7 @@
 
 ## Architecture
 
+```
 Browser
  └── Route 53 (DNS)
  └── CloudFront (CDN + HTTPS)
@@ -20,6 +21,7 @@ GitHub Actions
  ├── frontend-deploy.yml → build → S3 sync → CloudFront invalidation
  ├── backend-deploy.yml  → build image → push to ECR → update Lambda → health check
  └── lint.yml            → ruff (Python) + ESLint (JS) on push and PR
+```
 
 ---
 
@@ -41,6 +43,7 @@ GitHub Actions
 
 ## Project Structure
 
+```
 devops-portfolio/
 ├── frontend/                   # React/Vite app
 │   ├── src/
@@ -67,6 +70,7 @@ devops-portfolio/
         ├── frontend-deploy.yml
         ├── backend-deploy.yml
         └── lint.yml
+```
 
 ---
 
@@ -114,6 +118,8 @@ terraform plan
 2. Authenticate to ECR
 3. Push image tagged with `sha-run_number` to ECR
 4. Update Lambda function to use new image
+5. Wait for Lambda to finish updating
+6. Hit `/health` endpoint — fail the pipeline if not 200
 
 **Lint pipeline** triggers on push to main and all pull requests:
 1. Run ruff linter against backend Python
@@ -126,7 +132,7 @@ terraform plan
 
 AWS resources are defined as code across three modules in `infra/modules/`:
 
-- **storage** — S3 private bucket for frontend static files + CloudFront OAC
+- **storage** — S3 private bucket for frontend static files + CloudFront OAC + public access block
 - **cdn** — CloudFront distribution with OAC, HTTPS enforcement, custom domain + Route 53 records
 - **compute** — Lambda (FastAPI container, 256MB, 30s timeout) + API Gateway (HTTP, CORS, throttling) + ECR (immutable tags, vulnerability scanning) + IAM least-privilege execution role
 
@@ -157,6 +163,8 @@ Remote state is stored in S3 (`devops-portfolio-tfstate-kj`) with DynamoDB locki
 **Terraform state corruption** — Accidentally committed `.terraform/` directory containing a 648MB provider binary. Removed from git history using `git filter-branch` and added proper `.gitignore`.
 
 **Terraform module refactor + state migration** — Refactored monolithic `main.tf` into three child modules. Migrated local state to S3 backend with DynamoDB locking. Required careful `terraform state mv` and `terraform import` operations to remap existing resources to new module addresses without destroying live infrastructure.
+
+**Terraform circular dependency** — The storage module referenced the CDN module's CloudFront ARN for the bucket policy, and the CDN module referenced the storage module's S3 domain — creating a cycle Terraform couldn't resolve. Fixed by lifting the S3 bucket policy out of the storage module into the root `main.tf` where it could reference both modules freely.
 
 **ECR immutable tags + pipeline retry failure** — Switching ECR to immutable tags broke the pipeline because retrying a failed run reused the same git SHA tag which already existed in the registry. Fixed by tagging images with `github.sha`-`github.run_number` — the run number increments on every attempt, guaranteeing a unique tag even on retries of the same commit.
 
