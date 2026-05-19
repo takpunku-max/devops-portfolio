@@ -14,21 +14,6 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
-            - name: Setup Node
-              uses: actions/setup-node@v4
-              with:
-                node-version: '24'
-            
-            - name: Install dependencies
-              run: npm ci
-              working-directory: frontend
-
-            - name: Build
-              run: npm run build
-              working-directory: frontend
-              env:
-                VITE_API_URL: ${{ secrets.VITE_API_URL }}
-
             - name: Configure AWS crednetials 
               uses: aws-actions/configure-aws-credentials@v4
               with:
