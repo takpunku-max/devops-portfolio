@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KJ Akpunku - Resume</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+
+    <header>
+      <h1>KJ Akpunku</h1>
+      <h2>DevOps/Cloud Engineer</h2>
+      <p>College Station, TX | Open to Texas-based &amp; Remote</p>
+      <p>
+        <a href="mailto:takpun1@wgu.edu">takpun1@wgu.edu</a> |
+        361-585-3465 |
+        <a href="https://github.com/takpunku-max/">GitHub</a> |
+        <a href="https://linkedin.com/in/kj-akpunku-113968255">LinkedIn</a>
+      </p>
+    </header>
+
+    <nav>
+      <a href="resume.html">Resume</a>
+      <a href="cover-letter.html">Cover Letter</a>
+      <a href="career-goals.html">Career Goals</a>
+    </nav>
+
+    <main>
+
+      <section id="summary">
+        <h3>Summary</h3>
+        <hr>
+        <p>Your summary paragraph here</p>
+      </section>
+
+      <section id="certifications">
+        <h3>Certifications</h3>
+        <hr>
+        <table>
+          <caption>Professional Certifications</caption>
+          <tr>
+            <th>Certification</th>
+            <th>Issuer</th>
+            <th>Status</th>
+            <th>Year</th>
+          </tr>
+          <tr>
+            <td>AWS Certified Cloud Practitioner (CLF-C02)</td>
+            <td>Amazon Web Services</td>
+            <td>Active</td>
+            <td>2025</td>
+          </tr>
+          <tr>
+            <td>ITIL 4 Foundation</td>
+            <td>PeopleCert</td>
+            <td>Active</td>
+            <td>2025</td>
+          </tr>
+          <tr>
+            <td>CompTIA A+</td>
+            <td>CompTIA</td>
+            <td>Active</td>
+            <td>2026</td>
+          </tr>
+          <tr>
+            <td>CompTIA Network+</td>
+            <td>CompTIA</td>
+            <td>Active</td>
+            <td>2026</td>
+          </tr>
+          <tr>
+            <td>CompTIA Security+</td>
+            <td>CompTIA</td>
+            <td><em>In Progress</em></td>
+            <td>—</td>
+          </tr>
+        </table>
+      </section>
+
+      <section id="skills">
+        <h3>Technical Skills</h3>
+        <hr>
+        <ul>
+          <li><strong>Cloud &amp; Infrastructure:</strong> AWS (Lambda, S3, CloudFront, API Gateway, ECR, Bedrock, IAM), Docker, Linux</li>
+          <li><strong>DevOps &amp; Automation:</strong> Terraform, GitHub Actions, Git, shell scripting</li>
+          <li><strong>Security &amp; Observability:</strong> IAM least-privilege, API throttling, CloudWatch</li>
+          <li><strong>Networking:</strong> TCP/IP, DNS, firewalls, VLANs, routing &amp; switching</li>
+          <li><strong>Programming &amp; APIs:</strong> Python, FastAPI, REST APIs, AWS Bedrock</li>
+        </ul>
+      </section>
+
+      <section id="projects">
+        <h3>Projects</h3>
+        <hr>
+        <article>
+          <h4>AI Terraform Security &amp; Cost Analyzer</h4>
+          <p><em>AWS Bedrock | Terraform | Docker | GitHub Actions | FastAPI</em></p>
+          <ul>
+            <li>
+                Built a production-grade AI-powered web application that analyzes Terraform code for security misconfigurations, 
+                cost optimization opportunities, and best practice violations and returning plain-English summaries and corrected 
+                code using AWS Bedrock (Claude Haiku 4.5) via the boto3 runtime client.
+            </li>
+            <li>
+                Designed a modular Terraform architecture across three isolated modules (storage, CDN, compute) with remote state 
+                stored in S3 and DynamoDB locking to prevent concurrent apply conflicts — enabling safe, repeatable infrastructure 
+                changes.
+            </li>
+            <li>
+                Implemented DevSecOps practices throughout: immutable ECR image tags with sha-run_number format to prevent tag overwriting on pipeline retries, 
+                IAM execution role scoped to specific Bedrock model ARNs only, API Gateway throttling (burst 10 / rate 20), S3 public access block, TLS 1.2+ enforcement, 
+                input validation (50K character limit), and branch protection requiring lint checks before merge.
+            </li>
+            <li>
+                Built three GitHub Actions pipelines: 
+                frontend (Vite build → S3 sync → CloudFront invalidation), backend (Docker linux/amd64 build → ECR push → Lambda update → /health check), 
+                and lint (ruff + ESLint on every PR).
+            </li>
+            <li>
+                Resolved a Bedrock IAM cross-region routing issue where Lambda calls were being routed to us-east-2 by 
+                the inference profile but the policy only permitted us-east-1 — diagnosed through CloudWatch logs and 
+                fixed by scoping resource ARNs across regions while preserving model specificity.
+            </li>
+          </ul>
+          <p><a href="https://analyzer.kjdevops-portfolio.com">Live Site</a> | <a href="https://github.com/takpunku-max/terraform-analyzer">GitHub</a></p>
+        </article>
+
+        <article>
+          <h4>DevOps Portfolio Site</h4>
+          <p><em>AWS | Terraform | Docker | GitHub Actions | React | FastAPI</em></p>
+          <ul>
+            <li>
+                Designed and deployed a full-stack serverless portfolio site with React/Vite frontend 
+                on S3 + CloudFront and FastAPI backend in Docker on AWS Lambda via API Gateway, 
+                with all infrastructure provisioned as code across three Terraform modules (storage, CDN, 
+                compute) with remote state in S3 + DynamoDB locking.
+            </li>
+            <li>
+                Built three GitHub Actions pipelines: frontend (Vite build → S3 sync → CloudFront invalidation), 
+                backend (Docker linux/amd64 → ECR push with immutable sha-run_number tags → Lambda update), 
+                and lint (ruff + ESLint required on every PR before merge to main).
+            </li>
+            <li>
+                Implemented security hardening at every layer: CORS restricted to production domains, 
+                API Gateway throttling, S3 public access block, ECR immutable tags, IAM least-privilege, 
+                TLS 1.2+ enforcement, and branch protection with required status checks.
+            </li>
+            <li>
+                Resolved Terraform module refactor requiring careful state migration using terraform state mv and 
+                terraform import to remap live resources to new module addresses without destroying infrastructure.
+            </li>
+          </ul>
+          <p><a href="https://kjdevops-portfolio.com">Live Site</a> | <a href="https://github.com/takpunku-max/devops-portfolio">GitHub</a></p>
+        </article>
+
+        <article>
+          <h4>Cloud Infrastructure &amp; AI Health Platform</h4>
+          <p><em>AWS | Docker | GitHub Actions | FastAPI | Python</em></p>
+          <ul>
+            <li>
+                Deployed containerized FastAPI application behind Nginx with TLS on AWS EC2; 
+                automated EC2 lifecycle scheduling using EventBridge and Lambda with least-privilege IAM tag-based policies.
+            </li>
+            <li>
+                Integrated OpenAI API to convert raw system health metrics into human-readable operational summaries via a secure server-side endpoint, 
+                keeping secrets off the client.
+            </li>
+            <li>
+                Built GitHub Actions CI/CD pipeline that builds Docker images, runs checks, 
+                redeploys containers, and reloads services via systemd on push.
+            </li>
+          </ul>
+        </article>
+      </section>
+
+      <section id="experience">
+        <h3>Experience</h3>
+        <hr>
+        <article>
+          <h4>IT Student Worker — <span>Texas A&amp;M University System Office</span></h4>
+          <p><em>Aug 2024 – May 2026</em></p>
+          <ul>
+            <li>
+                Provide frontline IT support for enterprise end users across Microsoft 365, 
+                network connectivity, and endpoint systems in an environment serving thousands of users across the TAMU system.
+            </li>
+            <li>
+                Apply ITIL-aligned service management processes for incident tracking, 
+                escalation, and resolution documentation.
+            </li>
+            <li>
+                Collaborate with senior administrators and system engineers on infrastructure workflows, 
+                gaining hands-on exposure to enterprise IT operations.
+            </li>
+          </ul>
+        </article>
+      </section>
+
+      <section id="education">
+        <h3>Education</h3>
+        <hr>
+        <ul>
+          <li>
+            <strong>Bachelor of Science in Information Technology</strong> — Western Governors University<br>
+            <em>Expected December 2026</em>
+          </li>
+          <li>
+            <strong>Engineering</strong> — Texas A&amp;M University<br>
+            <em>2 years, transfer credits applied toward BSIT</em>
+          </li>
+        </ul>
+      </section>
+
+      <div id="date"></div>
+
+    </main>
+
+    <footer>
+      <p>&copy; 2025 KJ Akpunku</p>
+    </footer>
+
+    <script>
+      document.getElementById("date").innerHTML = "Last updated: " + new Date().toLocaleDateString();
+      console.log("Resume page loaded successfully.");
+    </script>
+
+  </body>
+</html>
+
