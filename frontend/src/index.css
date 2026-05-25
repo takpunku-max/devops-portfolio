@@ -534,3 +534,75 @@ main {
   display: flex;
   gap: 24px;
 }
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0 20px;
+    flex-wrap: wrap;
+    height: auto;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    gap: 8px;
+  }
+
+  .nav-links {
+    gap: 16px;
+  }
+
+  .hero {
+    padding: 40px 20px;
+    min-height: calc(100vh - 70px);
+  }
+
+  .hero-name {
+    font-size: 2.5rem;
+  }
+
+  .hero-title {
+    font-size: 1.3rem;
+  }
+
+  .about {
+    padding: 60px 20px;
+  }
+
+  .about-content {
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .about-stats {
+    flex-direction: row;
+    gap: 30px;
+  }
+
+  .page {
+    padding: 40px 20px;
+  }
+
+  .skill-item {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .footer {
+    padding: 20px;
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+
+  .hero-btns {
+    flex-direction: column;
+    width: fit-content;
+  }
+
+  .timeline {
+    padding-left: 20px;
+  }
+
+  .timeline-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}
