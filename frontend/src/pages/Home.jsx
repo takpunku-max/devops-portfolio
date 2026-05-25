@@ -8,7 +8,7 @@ function Home() {
         <h2 className="hero-title">DevOps & Cloud Engineer</h2>
         <p className="hero-sub">
           Building secure, automated cloud infrastructure on AWS. 
-          Terraform · Docker · GitHub Actions · FastAPI · React
+          Terraform · Docker · GitHub Actions · FastAPI
         </p>
         <div className="hero-btns">
           <a href="/projects" className="btn-primary">View Projects</a>

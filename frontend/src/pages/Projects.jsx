@@ -8,7 +8,7 @@ const projects = [
   },
   {
     title: "DevOps Portfolio Site",
-    tags: ["React", "FastAPI", "Terraform", "Docker", "GitHub Actions"],
+    tags: ["FastAPI", "Terraform", "Docker", "GitHub Actions"],
     description: "Full-stack serverless portfolio with React/Vite frontend on S3 + CloudFront and FastAPI backend on Lambda via API Gateway. Three Terraform modules with remote state, immutable ECR tags, and security hardening at every layer.",
     live: "https://kjdevops-portfolio.com",
     github: "https://github.com/takpunku-max/devops-portfolio"
