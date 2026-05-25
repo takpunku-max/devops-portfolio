@@ -34,6 +34,10 @@ resource "aws_lambda_function" "backend" {
   image_uri     = var.lambda_image_uri
   timeout       = 30
   memory_size   = 256
+
+  lifecycle {
+    ignore_changes = [image_uri]
+  }
 }
 
 resource "aws_apigatewayv2_api" "backend" {
