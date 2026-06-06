@@ -69,7 +69,7 @@ async def github_stats():
             )
             profile = profile_res.json()
 
-            repos__res = await client.get(
+            repos_res = await client.get(
                 f"https://api.github.com/users/{GITHUB_USERNAME}/repos?per_page=100&sort=updated",
                 headers=headers
             )
