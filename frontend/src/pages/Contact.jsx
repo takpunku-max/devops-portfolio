@@ -44,7 +44,7 @@ function Contact() {
               <span className="contact-icon">✉</span>
               <div>
                 <span className="contact-label">Email</span>
-                <span className="contact-value">takpun1@wgu.edu</span>
+                <span className="contact-value">kj.akpunku@decisivepoint.net</span>
               </div>
             </a>
             <a href="https://github.com/takpunku-max" target="_blank" className="contact-item">
