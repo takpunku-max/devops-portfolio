@@ -35,6 +35,13 @@ resource "aws_lambda_function" "backend" {
   timeout       = 30
   memory_size   = 256
 
+  environment{
+    variables = {
+      GIT_TOKEN = var.git_token
+      CONTACT_EMAIL = var.contact_email
+    }
+  }
+
   lifecycle {
     ignore_changes = [image_uri]
   }
