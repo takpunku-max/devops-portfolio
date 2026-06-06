@@ -1,20 +1,26 @@
-import { useEffect, useState } from 'react'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import Navbar from './components/Navbar'
+import Footer from './components/Footer'
+import Home from './pages/Home'
+import Projects from './pages/Projects'
+import Resume from './pages/Resume'
+import Contact from './pages/Contact'
+import './index.css'
 
 function App() {
-  const [health, setHealth] = useState(null)
-
-  useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/health`)
-      .then(r => r.json())
-      .then(setHealth)
-      .catch(() => setHealth({ status: 'unreachable' }))
-  }, [])
-
   return (
-    <main style={{ fontFamily: 'system-ui', padding: '2rem' }}>
-      <h1>KJ's DevOps Portfolio!</h1>
-      <p>API Status: <code>{health ? JSON.stringify(health) : 'loading...'}</code></p>
-    </main>
+    <Router>
+      <Navbar />
+      <main>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/projects" element={<Projects />} />
+          <Route path="/resume" element={<Resume />} />
+          <Route path="/contact" element={<Contact />} />
+        </Routes>
+      </main>
+      <Footer />
+    </Router>
   )
 }
 

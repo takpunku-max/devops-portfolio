@@ -27,3 +27,14 @@ variable "lambda_image_uri" {
   type        = string
   default     = "895112955219.dkr.ecr.us-east-1.amazonaws.com/devops-portfolio-backend:latest"
 }
+variable "git_token" {
+  description = "GitHub personal access token"
+  type = string
+  sensitive = true
+}
+
+variable "contact_email" {
+  description = "Email for contact form"
+  type = string
+  default = "kj.akpunku@decisivepoint.net"
+}

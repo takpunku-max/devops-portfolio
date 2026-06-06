@@ -12,3 +12,14 @@ variable "cors_allow_origins" {
   description = "Allowed origins for API Gateway CORS"
   type        = list(string)
 }
+
+variable "git_token" {
+  description = "GitHub personal access token for stats API"
+  type = string
+  sensitive = true
+}
+
+variable "contact_email" {
+  description = "Email address for contact form submissions"
+  type = string
+}
