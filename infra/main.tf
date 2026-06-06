@@ -16,9 +16,10 @@ module "compute" {
   source = "./modules/compute"
 
   project_name       = var.project_name
-  #lambda_image_uri   = "895112955219.dkr.ecr.us-east-1.amazonaws.com/devops-portfolio-backend:latest"
   lambda_image_uri   = "895112955219.dkr.ecr.us-east-1.amazonaws.com/devops-portfolio-backend:latest"
   cors_allow_origins = ["https://${var.domain_name}", "https://www.${var.domain_name}"]
+  git_token = var.git_token
+  contact_email = var.contact_email
 }
 
 resource "aws_s3_bucket_policy" "frontend" {
